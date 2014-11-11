@@ -247,6 +247,9 @@ void
 decrypt_verify_master_secret(mpz_t decrypted_ms, ps_msg *ms_ver, mpz_t key_exp, mpz_t key_mod)
 {
   // YOUR CODE HERE
+  mpz_t masterSecret;
+  mpz_init_set_str(masterSecret, hex_to_str(ms_ver->ps, RSA_MAX_LEN), 0);
+  perform_rsa(decrypted_ms, masterSecret, key_exp, key_mod);
 }
 
 /*
