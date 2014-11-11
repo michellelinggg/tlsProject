@@ -262,7 +262,17 @@ decrypt_verify_master_secret(mpz_t decrypted_ms, ps_msg *ms_ver, mpz_t key_exp, 
 void
 compute_master_secret(int ps, int client_random, int server_random, unsigned char *master_secret)
 {
-  // YOUR CODE HERE
+  SHA256_CTX ctx;
+
+  sha256_init(&ctx);
+
+  int intData[4] = {ps, client_random, server_random, ps};
+
+  unsigned char *data = (unsigned char *)intData;
+
+  sha256_update(&ctx, data, 16);
+
+  sha256_final(&ctx, master_secret);
 }
 
 /*
