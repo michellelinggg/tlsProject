@@ -415,6 +415,7 @@ get_cert_exponent(mpz_t result, char *cert)
 int
 get_cert_modulus(mpz_t result, char *cert)
 {
+  int err;
   char *srch, *srch2;
   char modulus[RSA_MAX_LEN/2];
   memset(modulus, 0, RSA_MAX_LEN/2);
