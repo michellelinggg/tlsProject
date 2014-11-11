@@ -293,7 +293,14 @@ send_tls_message(int socketno, void *msg, int msg_len)
 int
 receive_tls_message(int socketno, void *msg, int msg_len, int msg_type)
 {
-  // YOUR CODE HERE
+  int err = read(socketno, msg, msg_len);
+
+  int type = *((int *)msg);
+  if (type == msg_type) {
+    return ERR_OK;
+  } else {
+    return ERR_FAILURE;
+  }
 }
 
 
