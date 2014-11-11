@@ -220,10 +220,16 @@ int main(int argc, char **argv) {
  * \param key_mod          The modulus of the public key for decrypting
  *                         the certificate.
  */
+
 void
 decrypt_cert(mpz_t decrypted_cert, cert_message *cert, mpz_t key_exp, mpz_t key_mod)
 {
-  // YOUR CODE HERE
+// YOUR CODE HERE
+  mpz_t certMessage;
+  mpz_init(certMessage);
+  mpz_inp_str(certMessage, cert, 0);
+  perform_rsa(decrypted_cert, certMessage, key_exp, key_mod);
+
 }
 
 /*
