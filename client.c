@@ -271,7 +271,13 @@ compute_master_secret(int ps, int client_random, int server_random, unsigned cha
 int
 send_tls_message(int socketno, void *msg, int msg_len)
 {
-  // YOUR CODE HERE
+  int err = write(socketno, msg, msg_len);
+
+  if (err == -1) {
+    return ERR_FAILURE;
+  }
+  
+  return ERR_OK;
 }
 
 /*
@@ -287,7 +293,14 @@ send_tls_message(int socketno, void *msg, int msg_len)
 int
 receive_tls_message(int socketno, void *msg, int msg_len, int msg_type)
 {
-  // YOUR CODE HERE
+  int err = read(socketno, msg, msg_len);
+
+  int type = *((int *)msg);
+  if (type == msg_type) {
+    return ERR_OK;
+  } else {
+    return ERR_FAILURE;
+  }
 }
 
 
@@ -415,6 +428,7 @@ get_cert_exponent(mpz_t result, char *cert)
 int
 get_cert_modulus(mpz_t result, char *cert)
 {
+  int err;
   char *srch, *srch2;
   char modulus[RSA_MAX_LEN/2];
   memset(modulus, 0, RSA_MAX_LEN/2);
