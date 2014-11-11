@@ -271,7 +271,13 @@ compute_master_secret(int ps, int client_random, int server_random, unsigned cha
 int
 send_tls_message(int socketno, void *msg, int msg_len)
 {
-  // YOUR CODE HERE
+  int err = write(socketno, msg, msg_len);
+
+  if (err == -1) {
+    return ERR_FAILURE;
+  }
+  
+  return ERR_OK;
 }
 
 /*
