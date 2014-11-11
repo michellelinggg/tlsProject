@@ -226,8 +226,7 @@ decrypt_cert(mpz_t decrypted_cert, cert_message *cert, mpz_t key_exp, mpz_t key_
 {
 // YOUR CODE HERE
   mpz_t certMessage;
-  mpz_init(certMessage);
-  mpz_inp_str(certMessage, cert, 0);
+  mpz_init_set_str(certMessage, hex_to_str(cert->cert, RSA_MAX_LEN), 0);
   perform_rsa(decrypted_cert, certMessage, key_exp, key_mod);
 
 }
