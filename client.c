@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 
   // YOUR CODE HERE
   // IMPLEMENT THE TLS HANDSHAKE
-  printf("send client hello");
+  printf("send client hello\n");
 
 
   // send client hello
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  printf("receive server hello");
+  printf("receive server hello\n");
 
   // receive server hello
   hello_message server_hello_msg;
@@ -161,10 +161,10 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  printf("send client cert");
+  printf("send client cert\n");
 
 
-  // receive server certificate
+  //receive server certificate
 
   cert_message server_cert_msg;
 
@@ -173,56 +173,73 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  // mpz_t cert_plaintext;
-  // mpz_init(cert_plaintext);
+  printf("receive server cert\n");
 
-  // mpz_t ca_key_exp;
-  // mpz_init(ca_key_exp);
-  // mpz_t ca_key_mod;
-  // mpz_init(ca_key_mod);
 
-  // mpz_set_str(ca_key_exp, CA_EXPONENT, 0);
-  // mpz_set_str(ca_key_mod, CA_MODULUS, 0);
+  mpz_t cert_plaintext;
+  mpz_init(cert_plaintext);
 
-  // decrypt_cert(cert_plaintext, &server_cert_msg, ca_key_exp, ca_key_exp);
+  mpz_t ca_key_exp;
+  mpz_init(ca_key_exp);
 
-  // char cert_plaintext_string[RSA_MAX_LEN];
-  // mpz_get_ascii(cert_plaintext_string, cert_plaintext);
+  mpz_t ca_key_mod;
+  mpz_init(ca_key_mod);
 
-  // mpz_t premaster_secret;
-  // mpz_init(premaster_secret);
-  // mpz_t exponentNum;
-  // mpz_init(exponentNum);
-  // mpz_t modNum;
-  // mpz_init(modNum);
-  // get_cert_exponent(exponentNum, cert_plaintext_string);
-  // get_cert_modulus(modNum, cert_plaintext_string);
-  // int p_secret_int = random_int();
-  // mpz_t p_secret;
-  // mpz_init(p_secret);
-  // mpz_add_ui(p_secret, p_secret, p_secret_int);
-  // perform_rsa(premaster_secret, p_secret, exponentNum, modNum);
+  mpz_set_str(ca_key_exp, CA_EXPONENT, 0);
+  mpz_set_str(ca_key_mod, CA_MODULUS, 0);
 
-  // // send premaster secret
-  // err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
-  // if (err == ERR_FAILURE) {
-  //   exit(1);
-  // }
+  decrypt_cert(cert_plaintext, &server_cert_msg, ca_key_exp, ca_key_exp);
 
-  // ps_msg master_secret;
+  char cert_plaintext_string[RSA_MAX_LEN];
+  mpz_get_ascii(cert_plaintext_string, cert_plaintext);
 
-  // mpz_t decrypted_master_secret;
-  // mpz_init(decrypted_master_secret);
-  // mpz_t key_exp;
-  // mpz_init(key_exp);
-  // mpz_t key_mod;
-  // mpz_init(key_mod);
+  printf("decypted server cert\n");
 
-  // // receive master secret
-  // err = receive_tls_message(sockfd, &master_secret, PS_MSG_SIZE, VERIFY_MASTER_SECRET);
-  // if (err == ERR_FAILURE) {
-  //   exit(1);
-  // }
+  mpz_t premaster_secret_int;
+  mpz_init(premaster_secret_int);
+
+  mpz_t exponentNum;
+  mpz_init(exponentNum);
+  mpz_t modNum;
+  mpz_init(modNum);
+  get_cert_exponent(exponentNum, cert_plaintext_string);
+  get_cert_modulus(modNum, cert_plaintext_string);
+
+  int p_secret_int = random_int();
+  mpz_t p_secret;
+  mpz_init(p_secret);
+  mpz_add_ui(p_secret, p_secret, p_secret_int);
+
+  perform_rsa(premaster_secret_int, p_secret, exponentNum, modNum);
+
+  ps_msg premaster_secret;
+  premaster_secret.type = PREMASTER_SECRET;
+  mpz_get_ascii(premaster_secret.ps, premaster_secret_int);
+
+  // send premaster secret
+  err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
+
+  printf("sent premaster secret\n");
+  ps_msg master_secret;
+
+  mpz_t decrypted_master_secret;
+  mpz_init(decrypted_master_secret);
+  mpz_t key_exp;
+  mpz_init(key_exp);
+  mpz_t key_mod;
+  mpz_init(key_mod);
+
+  // receive master secret
+  err = receive_tls_message(sockfd, &master_secret, PS_MSG_SIZE, VERIFY_MASTER_SECRET);
+  if (err == ERR_FAILURE) {
+    printf("errorerrorerror\n");
+    exit(1);
+  }
+
+  printf("received master secret\n");
 
   // char private_key[RSA_MAX_LEN];
   // fgets(private_key, RSA_MAX_LEN, d_file);
@@ -456,21 +473,24 @@ receive_tls_message(int socketno, void *msg, int msg_len, int msg_type)
 static void
 perform_rsa(mpz_t result, mpz_t message, mpz_t e, mpz_t n)
 {
-  int odd_num;
+  mpz_t odd;
+  mpz_init(odd);
+  mpz_add_ui(result, result, 1);
 
-  mpz_set_str(result, "1", 10);
-  odd_num = mpz_odd_p(e);
-  while (mpz_cmp_ui(e, 0) > 0) {
-    if (odd_num) {
-      mpz_mul(result, result, message);
-      mpz_mod(result, result, n);
-      mpz_sub_ui(e, e, 1);
-    }
-    mpz_mul(message, message, message);
-    mpz_mod(message, message, n);
-    mpz_div_ui(e, e, 2);
-    odd_num = mpz_odd_p(e);
-  }
+  while (mpz_cmp_ui(e, 0)){
+      mpz_mod_ui(odd, e, 2);
+      if (mpz_cmp_ui(odd, 0)) {
+          mpz_mul(result, result, message);
+          mpz_mod(result, result, n);
+          mpz_sub_ui(e, e, 1);
+      } else {
+          mpz_mul(message, message, message);
+          mpz_mod(message, message, n);
+          mpz_div_ui(e, e, 2);
+      }
+    } 
+
+    mpz_clear(odd);
 }
 
 
