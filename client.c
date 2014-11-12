@@ -134,43 +134,54 @@ int main(int argc, char **argv) {
   // YOUR CODE HERE
   // IMPLEMENT THE TLS HANDSHAKE
 
+  // send client hello
   hello_message client_hello_msg = {CLIENT_HELLO, random_int(), TLS_RSA_WITH_AES_128_ECB_SHA256};
   err = send_tls_message(sockfd, &client_hello_msg, HELLO_MSG_SIZE);
   if (err == ERR_FAILURE) {
     exit(1);
   }
 
+  // receive server hello
   hello_message server_hello_msg;
   err = receive_tls_message(sockfd, &server_hello_msg, HELLO_MSG_SIZE, SERVER_HELLO);
   if (err == ERR_FAILURE) {
     exit(1);
   }
 
-  cert_message cert_msg;
+  // send client certificate
+  cert_message client_cert_msg;
+  client_cert_msg.type = CLIENT_CERTIFICATE;
+  fgets(client_cert_msg.cert, RSA_MAX_LEN, c_file);
+  err = send_tls_message(sockfd, &client_cert_msg, CERT_MSG_SIZE);
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
 
-  cert_msg.type = CLIENT_CERTIFICATE;
+  // receive server certificate
 
-  fgets(cert_msg.cert, RSA_MAX_LEN, c_file);
+  cert_message server_cert_msg;
 
+  err = receive_tls_message(sockfd, &server_cert_msg, CERT_MSG_SIZE, SERVER_CERTIFICATE);
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
 
+  ps_msg premaster_secret;
 
-  err = send_tls_message(sockfd, &cert_msg, CERT_MSG_SIZE);
+  // send premaster secret
+  err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
 
+  ps_msg master_secret;
+  // receive master secret
+  err = receive_tls_message(sockfd, &master_secret, PS_MSG_SIZE, VERIFY_MASTER_SECRET);
   if (err == ERR_FAILURE) {
     exit(1);
   }
 
 
-
-  err = receive_tls_message(sockfd, &cert_msg, CERT_MSG_SIZE, SERVER_CERTIFICATE);
-
-  if (err == ERR_FAILURE) {
-    exit(1);
-  }
-
-
-
-  err = send_tls_message(sockfd, &msg)
 
 
   /*
