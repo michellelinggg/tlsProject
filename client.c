@@ -157,6 +157,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+
   // receive server certificate
 
   cert_message server_cert_msg;
@@ -166,7 +167,23 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  ps_msg premaster_secret;
+  mpz_t cert_plaintext;
+  mpz_init(cert_plaintext);
+
+  decrypt_cert(cert_plaintext, &server_cert_msg, CA_EXPONENT, CA_MODULUS);
+
+  mpz_t premaster_secret;
+  mpz_init(premaster_secret);
+  mpz_t exponentNum;
+  mpz_init(exponentNum);
+  mpz_t modNum;
+  mpz_init(modNum);
+  get_cert_exponent(exponentNum, cert_plaintext);
+  get_cert_modulus(modNum, cert_plaintext);
+  mpz_t p_secret;
+  mpz_init(p_secret);
+  mpz_add_ui(p_secret, p_secret, random_int());
+  perform_rsa(premaster_secret, p_secret, exponentNum, modNum);
 
   // send premaster secret
   err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
