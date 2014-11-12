@@ -190,13 +190,10 @@ int main(int argc, char **argv) {
 
   decrypt_cert(cert_plaintext, &server_cert_msg, ca_key_exp, ca_key_mod);
 
-  char cert_plaintext_string[RSA_MAX_LEN];
-  mpz_get_ascii(cert_plaintext_string, cert_plaintext);
-
   printf("decypted server cert\n");
 
-  mpz_t premaster_secret_int;
-  mpz_init(premaster_secret_int);
+  char cert_plaintext_string[RSA_MAX_LEN];
+  mpz_get_ascii(cert_plaintext_string, cert_plaintext);
 
   mpz_t exponentNum;
   mpz_init(exponentNum);
@@ -205,6 +202,10 @@ int main(int argc, char **argv) {
   get_cert_exponent(exponentNum, cert_plaintext_string);
   get_cert_modulus(modNum, cert_plaintext_string);
 
+
+  mpz_t premaster_secret_int;
+  mpz_init(premaster_secret_int);
+  
   int p_secret_int = random_int();
   mpz_t p_secret;
   mpz_init(p_secret);
