@@ -134,6 +134,45 @@ int main(int argc, char **argv) {
   // YOUR CODE HERE
   // IMPLEMENT THE TLS HANDSHAKE
 
+  hello_message client_hello_msg = {CLIENT_HELLO, random_int(), TLS_RSA_WITH_AES_128_ECB_SHA256};
+  err = send_tls_message(sockfd, &client_hello_msg, HELLO_MSG_SIZE);
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
+
+  hello_message server_hello_msg;
+  err = receive_tls_message(sockfd, &server_hello_msg, HELLO_MSG_SIZE, SERVER_HELLO);
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
+
+  cert_message cert_msg;
+
+  cert_msg.type = CLIENT_CERTIFICATE;
+
+  fgets(cert_msg.cert, RSA_MAX_LEN, c_file);
+
+
+
+  err = send_tls_message(sockfd, &cert_msg, CERT_MSG_SIZE);
+
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
+
+
+
+  err = receive_tls_message(sockfd, &cert_msg, CERT_MSG_SIZE, SERVER_CERTIFICATE);
+
+  if (err == ERR_FAILURE) {
+    exit(1);
+  }
+
+
+
+  err = send_tls_message(sockfd, &msg)
+
+
   /*
    * START ENCRYPTED MESSAGES
    */
@@ -224,9 +263,8 @@ int main(int argc, char **argv) {
 void
 decrypt_cert(mpz_t decrypted_cert, cert_message *cert, mpz_t key_exp, mpz_t key_mod)
 {
-// YOUR CODE HERE
   mpz_t certMessage;
-  mpz_init_set_str(certMessage, hex_to_str(cert->cert, RSA_MAX_LEN), 0);
+  mpz_init_set_str(certMessage, cert->cert, 0);
   perform_rsa(decrypted_cert, certMessage, key_exp, key_mod);
 
 }
@@ -246,9 +284,8 @@ decrypt_cert(mpz_t decrypted_cert, cert_message *cert, mpz_t key_exp, mpz_t key_
 void
 decrypt_verify_master_secret(mpz_t decrypted_ms, ps_msg *ms_ver, mpz_t key_exp, mpz_t key_mod)
 {
-  // YOUR CODE HERE
   mpz_t masterSecret;
-  mpz_init_set_str(masterSecret, hex_to_str(ms_ver->ps, RSA_MAX_LEN), 0);
+  mpz_init_set_str(masterSecret, ms_ver->ps, 0);
   perform_rsa(decrypted_ms, masterSecret, key_exp, key_mod);
 }
 
