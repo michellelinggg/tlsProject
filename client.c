@@ -188,7 +188,7 @@ int main(int argc, char **argv) {
   mpz_set_str(ca_key_exp, CA_EXPONENT, 0);
   mpz_set_str(ca_key_mod, CA_MODULUS, 0);
 
-  decrypt_cert(cert_plaintext, &server_cert_msg, ca_key_exp, ca_key_exp);
+  decrypt_cert(cert_plaintext, &server_cert_msg, ca_key_exp, ca_key_mod);
 
   char cert_plaintext_string[RSA_MAX_LEN];
   mpz_get_ascii(cert_plaintext_string, cert_plaintext);
@@ -225,13 +225,6 @@ int main(int argc, char **argv) {
   printf("sent premaster secret\n");
   ps_msg master_secret;
 
-  mpz_t decrypted_master_secret;
-  mpz_init(decrypted_master_secret);
-  mpz_t key_exp;
-  mpz_init(key_exp);
-  mpz_t key_mod;
-  mpz_init(key_mod);
-
   // receive master secret
   err = receive_tls_message(sockfd, &master_secret, PS_MSG_SIZE, VERIFY_MASTER_SECRET);
   if (err == ERR_FAILURE) {
@@ -240,6 +233,15 @@ int main(int argc, char **argv) {
   }
 
   printf("received master secret\n");
+
+  mpz_t decrypted_master_secret;
+  mpz_init(decrypted_master_secret);
+
+  mpz_t key_exp;
+  mpz_init(key_exp);
+
+  mpz_t key_mod;
+  mpz_init(key_mod);
 
   // char private_key[RSA_MAX_LEN];
   // fgets(private_key, RSA_MAX_LEN, d_file);
