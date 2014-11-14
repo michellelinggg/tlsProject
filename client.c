@@ -210,12 +210,18 @@ int main(int argc, char **argv) {
   mpz_t p_secret;
   mpz_init(p_secret);
   mpz_add_ui(p_secret, p_secret, p_secret_int);
+  printf("%x\n", premaster_secret_int);
 
   perform_rsa(premaster_secret_int, p_secret, exponentNum, modNum);
 
   ps_msg premaster_secret;
+  printf("%x\n", premaster_secret.ps);
   premaster_secret.type = PREMASTER_SECRET;
   mpz_get_ascii(premaster_secret.ps, premaster_secret_int);
+  printf("%x\n", exponentNum);
+  printf("%x\n", modNum);
+  printf("%x\n", premaster_secret_int);
+  printf("%x\n", premaster_secret.ps);
 
   // send premaster secret
   err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
@@ -404,15 +410,10 @@ void
 compute_master_secret(int ps, int client_random, int server_random, unsigned char *master_secret)
 {
   SHA256_CTX ctx;
-
   sha256_init(&ctx);
-
   int intData[4] = {ps, client_random, server_random, ps};
-
   unsigned char *data = (unsigned char *)intData;
-
   sha256_update(&ctx, data, 16);
-
   sha256_final(&ctx, master_secret);
 }
 
@@ -451,7 +452,6 @@ int
 receive_tls_message(int socketno, void *msg, int msg_len, int msg_type)
 {
   int err = read(socketno, msg, msg_len);
-
   int type = *((int *)msg);
   if (type == msg_type) {
     return ERR_OK;
