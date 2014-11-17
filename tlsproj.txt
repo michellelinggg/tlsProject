@@ -8,4 +8,5 @@ Larry Cao cs161-bo
 3. The client and server hellos include a protocol which states what each member supports for block ciphers and hash functions; because these hellos are sent completely unencrypted, a man in the middle can change these to be the lowest, possibly broken version cipher suite that both the client and the server support. The client and server can exchange certificates before the hellos, that way they can encrypt their hellos with the other’s public key and sign it with their own private key so a man in the middle can’t tamper with/read them. 
 
 4. A man in the  middle can tamper with the messages sent and both the server and client would not know - They should authenticate their messages, especially the premaster and master secrets sent (i.e. by signing the message with their private keys)
- 
+We only use the server certificate to get their public key and mod but we never check to see if the certificate’s subject name actually matches the  name of the server we are trying to contact so an attacker can pretend to be the server and send their own certificate instead and steal all of our messages.
+The client never sends the server any sort of acknowledgement that the handshake is now over and that they will begin using the master key before they start sending the server encrypted messages and an attacker can exploit this  to confuse the server. 
