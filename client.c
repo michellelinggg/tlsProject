@@ -299,8 +299,6 @@ int main(int argc, char **argv) {
     printf("failure\n");
   }
 
-  exit(1);
-
   /*
    * START ENCRYPTED MESSAGES
    */
@@ -317,6 +315,14 @@ int main(int argc, char **argv) {
   
   // YOUR CODE HERE
   // SET AES KEYS
+
+  if (aes_setkey_enc (&enc_ctx, computed_master_secret, 128)){
+    printf("setting key didn't work nigga\n");
+  }
+
+  if (aes_setkey_enc (&dec_ctx, computed_master_secret, 128)){
+    printf("setting key didn't work nigga\n");
+  }
 
   fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
   /* Send and receive data. */
