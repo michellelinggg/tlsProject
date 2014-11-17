@@ -133,7 +133,6 @@ int main(int argc, char **argv) {
 
   // YOUR CODE HERE
   // IMPLEMENT THE TLS HANDSHAKE
-  printf("send client hello\n");
 
 
   // send client hello
@@ -143,7 +142,6 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  printf("receive server hello\n");
 
   // receive server hello
   hello_message server_hello_msg;
@@ -161,9 +159,6 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  printf("send client cert\n");
-
-
   //receive server certificate
 
   cert_message server_cert_msg;
@@ -172,9 +167,6 @@ int main(int argc, char **argv) {
   if (err == ERR_FAILURE) {
     exit(1);
   }
-
-  printf("receive server cert\n");
-
 
   mpz_t cert_plaintext;
   mpz_init(cert_plaintext);
@@ -190,8 +182,6 @@ int main(int argc, char **argv) {
 
   decrypt_cert(cert_plaintext, &server_cert_msg, ca_key_exp, ca_key_mod);
 
-  printf("decypted server cert\n");
-
   char cert_plaintext_string[RSA_MAX_LEN];
   mpz_get_ascii(cert_plaintext_string, cert_plaintext);
 
@@ -203,14 +193,6 @@ int main(int argc, char **argv) {
   get_cert_exponent(exponentNum, cert_plaintext_string);
   get_cert_modulus(modNum, cert_plaintext_string);
 
-  // char exponentNumString[RSA_MAX_LEN];
-  // char modNumString[RSA_MAX_LEN];
-
-  // mpz_get_str(exponentNumString, 16, exponentNum);
-  // mpz_get_str(modNumString, 16, modNum);
-
-  // printf("asdf %s\n", cert_plaintext_string);
-
 
   mpz_t premaster_secret_int;
   mpz_init(premaster_secret_int);
@@ -219,19 +201,13 @@ int main(int argc, char **argv) {
   mpz_t p_secret;
   mpz_init(p_secret);
   mpz_add_ui(p_secret, p_secret, p_secret_int);
-  printf("%x\n", premaster_secret_int);
 
   perform_rsa(premaster_secret_int, p_secret, exponentNum, modNum);
 
   ps_msg premaster_secret;
-  printf("%s\n", premaster_secret.ps);
   premaster_secret.type = PREMASTER_SECRET;
   mpz_get_str(premaster_secret.ps, 16, premaster_secret_int);
 
-  printf("%x\n", exponentNum);
-  printf("%x\n", modNum);
-  printf("%x\n", premaster_secret_int);
-  printf("encrypted premaster secret %s\n", premaster_secret.ps);
 
   // send premaster secret
   err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
@@ -239,17 +215,15 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  printf("sent premaster secret\n");
+ 
   ps_msg master_secret;
 
   // receive master secret
   err = receive_tls_message(sockfd, &master_secret, PS_MSG_SIZE, VERIFY_MASTER_SECRET);
   if (err == ERR_FAILURE) {
-    printf("errorerrorerror\n");
     exit(1);
   }
 
-  printf("received master secret\n");
 
   mpz_t decrypted_master_secret;
   mpz_init(decrypted_master_secret);
@@ -285,14 +259,11 @@ int main(int argc, char **argv) {
 
   mpz_get_str(decrypted_master_secret_char, 16, decrypted_master_secret);
 
-  printf("decrypted master secret %s \n", decrypted_master_secret_char);
-
   unsigned char computed_master_secret[16];
 
   compute_master_secret(p_secret_int, client_hello_msg.random, server_hello_msg.random, computed_master_secret);
 
-  printf("computed %s\n", hex_to_str(computed_master_secret, 16));
-
+  
   if (strcasecmp(decrypted_master_secret_char, hex_to_str(computed_master_secret, 16)) == 0) {
     printf("success\n");
   } else {
@@ -320,7 +291,7 @@ int main(int argc, char **argv) {
     printf("setting key didn't work nigga\n");
   }
 
-  if (aes_setkey_enc (&dec_ctx, computed_master_secret, 128)){
+  if (aes_setkey_dec (&dec_ctx, computed_master_secret, 128)){
     printf("setting key didn't work nigga\n");
   }
 
