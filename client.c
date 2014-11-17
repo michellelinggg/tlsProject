@@ -231,7 +231,7 @@ int main(int argc, char **argv) {
   printf("%x\n", exponentNum);
   printf("%x\n", modNum);
   printf("%x\n", premaster_secret_int);
-  printf("premaster secret %s\n", premaster_secret.ps);
+  printf("encrypted premaster secret %s\n", premaster_secret.ps);
 
   // send premaster secret
   err = send_tls_message(sockfd, &premaster_secret, PS_MSG_SIZE);
@@ -261,8 +261,6 @@ int main(int argc, char **argv) {
   mpz_init(key_mod);
 
   
-  // char *private_key_str;
-  
 
   fseek (d_file, 0, SEEK_END);
   long length = ftell (d_file);
@@ -283,31 +281,25 @@ int main(int argc, char **argv) {
 
   decrypt_verify_master_secret(decrypted_master_secret, &master_secret, key_exp, key_mod);
 
-  char decrypted_master_secret_char[RSA_MAX_LEN];
+  char decrypted_master_secret_char[16];
 
   mpz_get_str(decrypted_master_secret_char, 16, decrypted_master_secret);
 
   printf("decrypted master secret %s \n", decrypted_master_secret_char);
 
-  unsigned char computed_master_secret[RSA_MAX_LEN];
+  unsigned char computed_master_secret[16];
 
-  printf("computed before %s\n", computed_master_secret);
   compute_master_secret(p_secret_int, client_hello_msg.random, server_hello_msg.random, computed_master_secret);
 
-  printf("computed %s\n", computed_master_secret);
+  printf("computed %s\n", hex_to_str(computed_master_secret, 16));
 
-  // int i = 0;
-  // for (int i = 0; i < RSA_MAX_LEN; i++) {
-  //   if (computed_master_secret[i] != (unsigned char)decrypted_master_secret_char[i]) {
-  //     printf("error master secret");
-  //     exit(1);
-  //   }
-  // }
-
-  // printf("success");
+  if (strcasecmp(decrypted_master_secret_char, hex_to_str(computed_master_secret, 16)) == 0) {
+    printf("success\n");
+  } else {
+    printf("failure\n");
+  }
 
   exit(1);
-
 
   /*
    * START ENCRYPTED MESSAGES
@@ -422,7 +414,7 @@ decrypt_verify_master_secret(mpz_t decrypted_ms, ps_msg *ms_ver, mpz_t key_exp, 
 {
   mpz_t masterSecret;
 
-  printf("master secret %s\n", ms_ver->ps);
+  printf("encrypted master secret %s\n", ms_ver->ps);
   mpz_init_set_str(masterSecret, ms_ver->ps, 16);
 
   perform_rsa(decrypted_ms, masterSecret, key_exp, key_mod);
@@ -444,12 +436,8 @@ compute_master_secret(int ps, int client_random, int server_random, unsigned cha
   sha256_init(&ctx);
   int intData[4] = {ps, client_random, server_random, ps};
   unsigned char *data = (unsigned char *)intData;
-
-  if (data[0] == data[12] && data[1] == data[13] && data[2] == data[14] && data[3] == data[15]) {
-    printf("data %s", data);  
-  }
   
-  sha256_update(&ctx, data, 16);
+  sha256_update(&ctx, data, 4 * INT_SIZE);
   sha256_final(&ctx, master_secret);
 }
 
