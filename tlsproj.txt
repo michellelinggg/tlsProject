@@ -1,7 +1,7 @@
 Michelle Ling cs161-in
 Larry Cao cs161-bo
 
-1. 
+1. Because the type of messages are sent unencrypted, an attacker can change the type in a ls_msg from encrypted_message to error_message however often and whenever they want.
 
 2. The function random_int() does not return a truly random number because it uses the function time(NULL) as the seed for the number generator. Because the number returned is completely determined by the return of time(NULL) - which is the number of seconds passed since the Epoch - an attacker can guess this value with relatively little difficulty in magnitude of about a few seconds difference. Because the master secret is generated using values generated from random_int(), then encrypted with the server’s public key, a man in the middle can receive the client and server random numbers in the unencrypted hellos sent and he can get the server’s public key from the unencrypted Server Certificate; if he then takes note of the time the premaster secret was sent, he can guess with moderate accuracy the seed for srand and continuously call rand() and encrypt numbers until he has a match with the encrypted premaster secret sent from the client to the server. He then has all the parts needed to compute the master secret.
 
