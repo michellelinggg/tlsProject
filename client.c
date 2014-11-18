@@ -265,10 +265,8 @@ int main(int argc, char **argv) {
 
   
   if (strcasecmp(decrypted_master_secret_char, hex_to_str(computed_master_secret, 16)) == 0) {
-    printf("success\n");
-  } else {
-    printf("failure\n");
-  }
+    printf("Begin messages.\n");
+  } 
 
   /*
    * START ENCRYPTED MESSAGES
@@ -390,8 +388,6 @@ void
 decrypt_verify_master_secret(mpz_t decrypted_ms, ps_msg *ms_ver, mpz_t key_exp, mpz_t key_mod)
 {
   mpz_t masterSecret;
-
-  printf("encrypted master secret %s\n", ms_ver->ps);
   mpz_init_set_str(masterSecret, ms_ver->ps, 16);
 
   perform_rsa(decrypted_ms, masterSecret, key_exp, key_mod);
